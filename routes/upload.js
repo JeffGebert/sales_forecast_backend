@@ -3,7 +3,7 @@ var router = express.Router();
 const http = require('http');
 const multer = require('multer');
 const fs = require('fs');
-const csv = require('fast-csv');
+const csv = require('csvtojson');
 const upload = multer({ dest: 'tmp/csv/' });
 
 
@@ -17,26 +17,14 @@ module.exports = (db) => {
     res.send("hello jeff you are awesome")
   });
   
-  router.post('/', upload.single('file'), function (req, res) {
+  router.post('/', upload.single('file'), async (req, res) => {
     console.log("hi")
-    console.log("req.file", req.file)
-    console.log("req.file.path", req.file.path)
-    
-    const fileRows = [];
-    csv.fromPath(req.file.path)
-      .on('data', function (data) {
-        console.log("started")
-        fileRows.push(data);
-        
-      })
-      .on('end', function () {
-        console.log("finished")
-        res.send("finished mother fucker")
-        fs.unlinkSync(req.file.path);
-        //process "fileRows" and respond
-      })
+
+    const jsonArray=await csv().fromFile(req.file.path)
+    console.log("jsonArray", jsonArray)
+    res.send("done")
+
   });
-  
   
   return router;
 
